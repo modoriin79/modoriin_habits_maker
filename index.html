@@ -1,23 +1,20 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#f5f3ec"/><meta name="description" content="매일의 작은 실천을 유리병에 모으는 나만의 습관 공간, Little Ritual."/><title>Little Ritual — 작은 실천을 모으는 곳</title></head>
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#f7f7f2"/><meta name="description" content="구슬 30개로 기록하는 나의 습관"/><title>습관 기록</title></head>
 <body>
 <div class="app">
-<header><a class="brand" href="./" aria-label="Little Ritual 홈"><span class="brand-mark">◌</span> little ritual<span class="brand-dot">.</span></a><div class="header-note">작은 실천이, 눈에 보이는 변화로</div><button id="about" class="icon-button" aria-label="이용 안내">?</button></header>
+<header><a href="./">습관 기록</a><button id="about" class="text-button">도움말 · 백업</button></header>
 <main>
-<div class="intro"><span class="eyebrow">ONE DAY, ONE LITTLE MARBLE</span><h1>작은 실천을 모으는 곳</h1><p>서두르지 않아도 괜찮아요. 나만의 속도로 채워가요.</p></div>
 <section class="ritual" aria-label="나의 습관 유리병">
-<div class="habit-heading"><span class="habit-label"><span class="tiny-dot"></span> MY DAILY RITUAL</span><button id="edit-habit" title="습관 이름 바꾸기"><h2 id="habit-name">나의 첫 번째 습관</h2><span aria-hidden="true">↗</span></button><span id="today-date" class="today-date"></span></div>
-<div id="scene" role="img" aria-label="투명한 유리병과 오늘의 구슬"><div id="render-error" hidden>3D 화면을 표시할 수 없어요. 브라우저의 하드웨어 가속을 켜고 다시 열어주세요.</div></div>
-<div class="jar-caption"><span id="jar-number">JAR NO. 01</span><div><strong id="count">0</strong><span class="denominator"> / 30</span></div><div class="progress-track"><div id="progress"></div></div></div>
-<button id="add-marble" class="marble-hit" aria-label="오늘의 구슬 넣기"><span class="marble-instruction">오늘의 구슬 <span aria-hidden="true">↖</span></span><span class="marble-hint">터치해서 병에 넣어주세요</span></button>
-<div class="status-area"><p id="status" role="status" aria-live="polite">오늘의 작은 약속, 지키셨나요?</p><button id="undo" class="text-button" hidden>오늘 기록 취소</button><p id="storage-error" class="error" hidden></p></div>
-<div class="scene-note"><span>하루에 하나씩</span><i></i><span>빠뜨려도 사라지지 않아요</span></div>
+<form id="habit-form"><label for="habit-input">나의 습관</label><div class="input-row"><input id="habit-input" maxlength="50" required placeholder="습관 이름을 입력하세요" autocomplete="off"/><button type="submit" id="save-habit">저장</button></div></form>
+<div class="summary"><span id="today-date"></span><span><strong id="count">0</strong> / 30</span></div>
+<div id="scene" role="group" aria-label="유리병과 남은 구슬"><div id="render-error" hidden>3D 화면을 표시할 수 없습니다. 브라우저의 하드웨어 가속을 확인해주세요.</div></div>
+<div class="scene-labels"><span id="jar-number">1번째 병</span><span>남은 구슬 <strong id="remaining-count">30</strong>개</span></div>
+<div class="status-area"><p id="status" role="status" aria-live="polite">습관 이름을 입력해주세요.</p><button id="undo" class="text-button" hidden>오늘 기록 취소</button><p id="storage-error" class="error" hidden></p></div>
 </section>
-<section class="collection" aria-label="완성한 유리병 모음"><div class="collection-heading"><div><span class="eyebrow">YOUR LITTLE ACHIEVEMENTS</span><h2>차곡차곡, 나의 기록 <span id="collection-count">0</span></h2></div><span class="collection-note">30번의 실천이 하나의 빛깔로</span></div><div id="collection-list" tabindex="0" aria-label="완성된 병, 가로로 스크롤하세요"><div class="empty-collection"><div class="empty-jar" aria-hidden="true"></div><div><p>첫 번째 빛깔을 기다리고 있어요</p><span>하루하루 모은 마음이, 이곳에 오래 남을 거예요.</span></div><span class="empty-number">01 — ∞</span></div></div></section>
-</main><footer><span class="footer-brand">little steps. lasting colors.</span><span>나의 브라우저에 소중히 저장돼요 <span aria-hidden="true">↗</span></span></footer>
+<section class="collection" aria-label="완성한 유리병 모음"><h2>완성한 병 <span id="collection-count">0</span></h2><div id="collection-list" tabindex="0" aria-label="완성된 병, 가로로 스크롤하세요"></div></section>
+</main>
 </div>
-<dialog id="habit-dialog"><form id="habit-form"><span class="eyebrow">A SMALL PROMISE TO YOURSELF</span><h2>어떤 습관을 모아볼까요?</h2><p>거창하지 않아도 좋아요.<br>매일 나에게 건네고 싶은 작은 약속을 적어주세요.</p><label for="habit-input">나의 습관</label><input id="habit-input" maxlength="50" required placeholder="예: 하루 10분 책 읽기" autocomplete="off"/><div class="suggestions"><button type="button">책 10분 읽기</button><button type="button">가볍게 산책하기</button><button type="button">물 충분히 마시기</button></div><button class="primary" type="submit">나의 유리병 시작하기 <span>↗</span></button><button type="button" class="text-button" id="cancel-edit" hidden>닫기</button><small>한 번에 하나의 습관에 집중해요.</small></form></dialog>
-<dialog id="about-dialog"><div class="about-content"><span class="eyebrow">HOW IT WORKS</span><h2>하루 하나, 나를 위한 구슬</h2><p>습관을 실천한 날, 병 옆 구슬을 눌러주세요. 기기의 현지 날짜를 기준으로 하루에 하나씩 기록해요.</p><p>30번을 모으면 병에 새로운 빛깔이 생겨요. 연속으로 실천하지 않아도 괜찮아요. 모아둔 구슬은 그대로 남아요.</p><p>30번째 기록을 취소하면 완성된 병도 다시 29개 상태로 돌아와요.</p><p class="privacy-note">기록은 이 기기의 이 브라우저에만 저장돼요. 브라우저 데이터를 지우면 기록도 사라져요. 다른 기기와 자동 동기화되지 않아요.</p><button id="export" class="secondary">기록 백업하기</button><label class="secondary import-label">백업 불러오기<input id="import" type="file" accept="application/json" hidden/></label><button id="close-about" class="primary">알겠어요</button></div></dialog>
+<dialog id="about-dialog"><div class="about-content"><h2>이용 안내</h2><p>습관을 실천한 날 남은 구슬 중 하나를 누르면 병에 들어갑니다. 현지 날짜 기준으로 하루에 하나씩 기록합니다.</p><p>총 30개를 넣으면 병이 완성됩니다. 연속으로 기록할 필요는 없습니다. 오늘 기록을 취소하면 구슬이 돌아오며, 30번째 기록의 완성 처리도 취소됩니다.</p><p>기록은 현재 브라우저에 저장됩니다. 브라우저 데이터를 삭제하기 전이나 다른 기기로 옮길 때 백업해주세요.</p><button id="export" class="secondary">기록 백업하기</button><label class="secondary import-label">백업 불러오기<input id="import" type="file" accept="application/json" hidden/></label><button id="close-about" class="primary">닫기</button></div></dialog>
 <script type="module" src="/src/main.js"></script>
 </body></html>

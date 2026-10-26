@@ -17,57 +17,56 @@ function updateCollection() {
  const list = $('collection-list');
  $('collection-count').textContent = state.jars.length;
  if(!state.jars.length) {
-  list.innerHTML = '<div class="empty-collection"><div class="empty-jar" aria-hidden="true"></div><div><p>첫 번째 빛깔을 기다리고 있어요</p><span>하루하루 모은 마음이, 이곳에 오래 남을 거예요.</span></div><span class="empty-number">01 — ∞</span></div>';return;
+  list.innerHTML = '<p class="empty-collection">아직 완성한 병이 없습니다.</p>';return;
  }
  list.replaceChildren();
  state.jars.forEach((record,i)=>{
   const card=document.createElement('figure');card.className='jar-card';
   const key=JSON.stringify(record);if(!thumbs.has(key)&&scene)thumbs.set(key,scene.thumbnail(record));
   const img=document.createElement('img');img.src=thumbs.get(key)||'';img.alt=`${i+1}번째 완성된 유리병, 구슬 30개`;img.width=122;img.height=130;
-  const caption=document.createElement('figcaption');caption.textContent=`NO. ${String(i+1).padStart(2,'0')}`;
+  const caption=document.createElement('figcaption');caption.textContent=`${i+1}번째 병`;
   const date=document.createElement('time');date.dateTime=record.date;date.textContent=record.date.replaceAll('-','.');caption.append(date);card.append(img,caption);list.append(card);
  });
 }
 function sync({collection=false}={}) {
  const today=completedToday(state);const entries=currentEntries(state);
- $('habit-name').textContent=state.name||'나의 첫 번째 습관';
- $('count').textContent=entries.length;$('progress').style.width=`${entries.length/30*100}%`;
- $('jar-number').textContent=`JAR NO. ${String(state.jars.length+1).padStart(2,'0')}`;
- $('today-date').textContent=new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'}).format(new Date());
- $('add-marble').disabled=busy||today||!state.name||!storageAvailable||!scene;
- $('edit-habit').disabled=busy||!storageAvailable;
+ if(document.activeElement!==$('habit-input'))$('habit-input').value=state.name;
+ $('count').textContent=entries.length;
+ $('remaining-count').textContent=30-entries.length;
+ $('jar-number').textContent=`${state.jars.length+1}번째 병`;
+ $('today-date').textContent=new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'short'}).format(new Date());
+ $('habit-input').disabled=busy||!storageAvailable;
+ $('save-habit').disabled=busy||!storageAvailable;
  $('undo').hidden=!today||state.entries.at(-1)?.date!==localDate();$('undo').disabled=busy;
- $('status').textContent=today?'오늘의 습관을 지켰어요':'오늘의 작은 약속, 지키셨나요?';
- $('scene').setAttribute('aria-label',`투명한 유리병 안에 구슬 ${entries.length}개. ${today?'오늘 기록 완료':'오늘 기록 가능'}`);
- document.querySelector('.marble-instruction').innerHTML=today?'오늘도 잘했어요 <span>✓</span>':'오늘의 구슬 <span aria-hidden="true">↖</span>';
- document.querySelector('.marble-hint').textContent=today?'다음 구슬은 내일 만나요':'터치해서 병에 넣어주세요';
+ $('status').textContent=today?'오늘 기록 완료':state.name?'구슬을 누르면 오늘 기록이 추가됩니다.':'습관 이름을 입력해주세요.';
+ $('scene').setAttribute('aria-label',`병 안 ${entries.length}개, 남은 구슬 ${30-entries.length}개. ${today?'오늘 기록 완료':'오늘 기록 가능'}`);
  scene?.load(entries.map(e=>e.position),today);
+ scene?.setEnabled(!busy&&!today&&!!state.name&&storageAvailable);
  if(collection)updateCollection();
 }
-function openHabit() {
- $('habit-input').value=state.name;$('cancel-edit').hidden=!state.name;
- $('habit-form').querySelector('.primary').innerHTML=state.name?'이름 저장하기 <span>↗</span>':'나의 유리병 시작하기 <span>↗</span>';
- $('habit-dialog').showModal();
+function saveHabit(){
+ const name=$('habit-input').value.trim();
+ if(!name){$('habit-input').setCustomValidity('습관 이름을 입력해주세요.');return false;}
+ if(name===state.name)return true;
+ // Keep records written by another tab when changing just the name.
+ try {return persist({...loadState(),name});} catch {error('기록을 읽을 수 없습니다. 새로고침 후 확인해주세요.');return false;}
 }
-$('habit-dialog').addEventListener('cancel',e=>{if(!state.name)e.preventDefault();});
-$('edit-habit').onclick=openHabit;
-$('cancel-edit').onclick=()=>$('habit-dialog').close();
-document.querySelectorAll('.suggestions button').forEach(b=>b.onclick=()=>{$('habit-input').value=b.textContent;$('habit-input').focus();});
-$('habit-form').onsubmit=e=>{e.preventDefault();const name=$('habit-input').value.trim();if(!name){$('habit-input').setCustomValidity('습관 이름을 입력해주세요.');$('habit-input').reportValidity();return;}if(persist({...state,name})){sync();$('habit-dialog').close();}};
+$('habit-form').onsubmit=e=>{e.preventDefault();if(saveHabit()){document.activeElement.blur();sync();}};
 $('habit-input').oninput=()=>$('habit-input').setCustomValidity('');
-async function add() {
+$('habit-input').onchange=()=>{if($('habit-input').value.trim()&&saveHabit())sync();};
+async function add(index=0) {
  if(busy||!scene||!storageAvailable||!state.name)return;
  busy=true;
  async function operation(){
   try {
    state=loadState();if(completedToday(state))return;
-   const date=localDate();sync();document.querySelector('.ritual').classList.add('busy');$('status').textContent='작은 실천이 쌓이고 있어요…';
-   const position=await scene.drop();
+   const date=localDate();sync();document.querySelector('.ritual').classList.add('busy');$('status').textContent='기록 중…';
+   const position=await scene.drop(index);
    const next=addEntry(state,{date,position});
    if(!persist(next))return;
-   $('count').textContent=next.entries.length%30||30;$('progress').style.width=`${(next.entries.length%30||30)/30*100}%`;
+   $('count').textContent=next.entries.length%30||30;$('remaining-count').textContent=30-(next.entries.length%30||30);
    if(next.entries.length%30===0){
-    $('status').textContent='서른 번의 실천, 나만의 빛깔이 되었어요';
+    $('status').textContent='30개 완료';
     await scene.complete(next.jars.at(-1).color);
     updateCollection();$('collection-list').scrollTo({left:$('collection-list').scrollWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
    }
@@ -76,8 +75,7 @@ async function add() {
  try { if(navigator.locks) await navigator.locks.request('little-ritual-write',operation);else await operation(); }
  finally {busy=false;document.querySelector('.ritual').classList.remove('busy');sync();}
 }
-$('add-marble').onclick=add;
-$('scene').addEventListener('pointerup',e=>{if(scene?.hit(e))add();});
+$('scene').addEventListener('click',e=>{const button=e.target.closest('.reserve-hit');if(button&&!button.disabled)add(Number(button.dataset.index));});
 $('undo').onclick=async()=>{
  if(busy)return;
  const operation=()=>{try{state=loadState();if(persist(undoToday(state)))sync({collection:true});}catch{error('기록을 읽지 못했어요. 새로고침 후 확인해주세요.');}};
@@ -94,4 +92,4 @@ let previousDay=localDate();
 function checkDay(){if(busy)return;const day=localDate();if(day!==previousDay){previousDay=day;sync();}}
 setInterval(checkDay,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkDay();});window.addEventListener('focus',checkDay);
 window.addEventListener('storage',e=>{if(e.key===KEY&&!busy){try{state=loadState();sync({collection:true});}catch{error('다른 탭의 기록을 읽을 수 없어요.');}}});
-sync({collection:true});if(!state.name&&storageAvailable)openHabit();
+sync({collection:true});
