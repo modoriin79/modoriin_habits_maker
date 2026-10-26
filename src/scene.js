@@ -15,7 +15,7 @@ function marble(index) {
  const mesh = new THREE.Mesh(sphereGeometry, material); mesh.castShadow = true;
  return mesh;
 }
-function makeJar(color = '#ccd4c8') {
+function makeJar(color = '#c6cbd0') {
  const group = new THREE.Group();
  const material = new THREE.MeshPhysicalMaterial({color, metalness:0.02, roughness:0.12, transparent:true, opacity:0.17, transmission:0, depthWrite:false, side:THREE.DoubleSide, clearcoat:1, clearcoatRoughness:0.06, envMapIntensity:0.85 });
  const glass = new THREE.Mesh(jarGeometry, material); glass.renderOrder = 3; group.add(glass);
@@ -33,9 +33,9 @@ function makeJar(color = '#ccd4c8') {
  return { group, materials:[material,edgeMaterial,ribMaterial] };
 }
 function lighting(scene) {
- scene.add(new THREE.HemisphereLight('#fffdf3','#a6ad90',1.6));
- const sun = new THREE.DirectionalLight('#fff9e8',2.2);sun.position.set(-3,7,5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-5;sun.shadow.camera.right=5;sun.shadow.camera.top=5;sun.shadow.camera.bottom=-5;sun.shadow.normalBias=0.025;sun.shadow.bias=-0.0001;sun.shadow.radius=4;scene.add(sun);
- const fill=new THREE.DirectionalLight('#e6eedb',1.2);fill.position.set(4,4,-3);scene.add(fill);
+ scene.add(new THREE.HemisphereLight('#ffffff','#b9bec5',1.6));
+ const sun = new THREE.DirectionalLight('#ffffff',2.2);sun.position.set(-3,7,5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-5;sun.shadow.camera.right=5;sun.shadow.camera.top=5;sun.shadow.camera.bottom=-5;sun.shadow.normalBias=0.025;sun.shadow.bias=-0.0001;sun.shadow.radius=4;scene.add(sun);
+ const fill=new THREE.DirectionalLight('#f1f5ff',1.2);fill.position.set(4,4,-3);scene.add(fill);
 }
 export function createScene(container) {
  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true });
@@ -48,7 +48,7 @@ export function createScene(container) {
  const plane=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.ShadowMaterial({opacity:0.105}));plane.rotation.x=-Math.PI/2;plane.position.y=0.02;plane.receiveShadow=true;scene.add(plane);
  // Soft contact shadow generated in code, with no image assets.
  const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;
- const ctx=shadowCanvas.getContext('2d');const gradient=ctx.createRadialGradient(64,64,3,64,64,64);gradient.addColorStop(0,'rgba(70,80,54,.19)');gradient.addColorStop(.5,'rgba(70,80,54,.08)');gradient.addColorStop(1,'rgba(70,80,54,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
+ const ctx=shadowCanvas.getContext('2d');const gradient=ctx.createRadialGradient(64,64,3,64,64,64);gradient.addColorStop(0,'rgba(35,39,45,.19)');gradient.addColorStop(.5,'rgba(35,39,45,.08)');gradient.addColorStop(1,'rgba(35,39,45,0)');ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(3.3,3.3),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.025;content.add(shadow);
  let marbles=[], busy=false, enabled=false;
  const reserve=Array.from({length:30},(_,i)=>{
@@ -82,7 +82,7 @@ export function createScene(container) {
  function load(positions,today=false){
   clearMarbles();positions.forEach((p,i)=>{const m=marble(i);m.position.set(...p);jar.group.add(m);marbles.push(m);});
   reserve.forEach(({mesh,home,button},i)=>{mesh.position.copy(home);mesh.visible=i<30-positions.length;button.hidden=!mesh.visible;button.disabled=today||!enabled||busy;});
-  content.scale.setScalar(1);content.position.set(-1.65,0,0);jar.materials.forEach(m=>m.color.set('#ccd4c8'));placeButtons();render();
+  content.scale.setScalar(1);content.position.set(-1.65,0,0);jar.materials.forEach(m=>m.color.set('#c6cbd0'));placeButtons();render();
  }
  function tween(duration, callback){return new Promise(resolve=>{const start=performance.now();function next(now){const t=Math.min((now-start)/duration,1);callback(t);render();if(t<1)requestAnimationFrame(next);else resolve();}requestAnimationFrame(next);});}
  async function drop(index=0){
@@ -97,7 +97,7 @@ export function createScene(container) {
  await new Promise(resolve=>{function tick(now){const dt=Math.min((now-last)/1000,.05);last=now;elapsed+=dt;physics.world.step(1/120,dt,8);m.position.copy(body.position);m.quaternion.copy(body.quaternion);render();settled=body.velocity.length()<.07?settled+dt:0;if((settled>.45&&elapsed>1)||elapsed>7){resolve();}else requestAnimationFrame(tick);}requestAnimationFrame(tick);});
  busy=false;return m.position.toArray();
  }
- async function complete(color){busy=true;const from=new THREE.Color('#ccd4c8'),to=new THREE.Color(color);await tween(1100,t=>{jar.materials.forEach(m=>m.color.copy(from).lerp(to,t));});await tween(900,()=>{});await tween(900,t=>{const ease=t*t*(3-2*t);content.scale.setScalar(1-ease*.8);content.position.y=-ease*1.8;});busy=false;}
+ async function complete(color){busy=true;const from=new THREE.Color('#c6cbd0'),to=new THREE.Color(color);await tween(1100,t=>{jar.materials.forEach(m=>m.color.copy(from).lerp(to,t));});await tween(900,()=>{});await tween(900,t=>{const ease=t*t*(3-2*t);content.scale.setScalar(1-ease*.8);content.position.y=-ease*1.8;});busy=false;}
  function thumbnail(record){
   const previewScene=new THREE.Scene();previewScene.environment=environment.texture;lighting(previewScene);
   const preview=makeJar(record.color);previewScene.add(preview.group);record.positions.forEach((p,i)=>{const m=marble(i);m.position.set(...p);preview.group.add(m);});

@@ -14,12 +14,13 @@ async function seed(page,n){
  },n);
  await page.reload();
 }
+// Forced software WebGL can render the physics animation slower than real time.
 test('first habit, real drop, daily lock, persistence, undo',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
  await expect(page.locator('dialog[open]')).toHaveCount(0);await expect(page.locator('.reserve-hit:visible')).toHaveCount(30);
  await page.getByLabel('나의 습관',{exact:true}).fill('하루 10분 책 읽기');await page.getByRole('button',{name:'저장',exact:true}).click();
  await expect(page.locator('#count')).toHaveText('0');await page.screenshot({path:'/tmp/little-ritual-empty.png',fullPage:true});
- await page.getByRole('button',{name:'오늘의 구슬 넣기'}).click();await expect(page.locator('#status')).toHaveText('오늘 기록 완료',{timeout:20000});await expect(page.locator('#count')).toHaveText('1');await expect(page.locator('.reserve-hit:visible')).toHaveCount(29);await expect(page.locator('#remaining-count')).toHaveText('29');await expect(page.locator('#add-marble')).toBeDisabled();
+ await page.getByRole('button',{name:'오늘의 구슬 넣기'}).click();await expect(page.locator('#status')).toHaveText('오늘 기록 완료',{timeout:45000});await expect(page.locator('#count')).toHaveText('1');await expect(page.locator('.reserve-hit:visible')).toHaveCount(29);await expect(page.locator('#remaining-count')).toHaveText('29');await expect(page.locator('#add-marble')).toBeDisabled();
  const saved=await page.evaluate(()=>localStorage.getItem('little-ritual:v1'));await page.reload();await expect(page.locator('#count')).toHaveText('1');expect(await page.evaluate(()=>localStorage.getItem('little-ritual:v1'))).toBe(saved);
  await page.getByRole('button',{name:'오늘 기록 취소'}).click();await expect(page.locator('#count')).toHaveText('0');await expect(page.locator('#add-marble')).toBeEnabled();expect(errors).toEqual([]);
 });
