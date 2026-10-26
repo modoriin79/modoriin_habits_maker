@@ -1,0 +1,2 @@
+# Generated bundles contain vendor GLSL strings; keep upstream whitespace intact.
+docs/assets/* -whitespace linguist-generated=true

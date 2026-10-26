@@ -1,0 +1,13 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+const root=resolve('dist');
+let html=await readFile(resolve(root,'index.html'),'utf8');
+const script=html.match(/<script\s+type="module"[^>]*src="([^"]+)"[^>]*><\/script>/);
+const style=html.match(/<link\s+rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/);
+if(!script||!style)throw new Error('Build output missing');
+const js=await readFile(resolve(root,script[1].replace(/^\//,'')),'utf8');
+const css=await readFile(resolve(root,style[1].replace(/^\//,'')),'utf8');
+html=html.replace(script[0],()=>`<script type="module">${js.replaceAll('</script','<\\/script')}</script>`).replace(style[0],()=>`<style>${css}</style>`);
+await mkdir('/workspace/artifacts',{recursive:true});
+await writeFile('/workspace/artifacts/little-ritual.html',html);
+console.log('Standalone preview written to /workspace/artifacts/little-ritual.html');
